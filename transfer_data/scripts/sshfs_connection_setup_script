@@ -1,0 +1,58 @@
+#!/bin/sh
+###########################################################################
+#
+# Updates the root .ssh/config file with an entry for the SSH server
+#   to be used as the shared folder monitored by the Data Diode sending
+#   process
+#
+# NOTE: The ID file (private key) is not included in this script for
+#   security reasons.  It must be manually copied to the /root/.ssh
+#   folder and named the same thing as the idfile variable below.
+#
+###########################################################################
+
+# Define host by either name or IP
+host="10.4.11.50" # Alternative by hostname - host="SDSNAS01"
+
+# Full hostname may or may not be the same as the host
+fullhostname="<something.com>"
+
+user="controls"
+idfile="~/.ssh/controls_rsa"
+
+# Shouldn't need to change these values
+keepalive=30 # Time between keep-alive packets (in seconds)
+hbcount=4 # Disconnect after this number of non-responsive keep-alive attempts
+configfile="/root/.ssh/config"
+tmpfile="ssh_config"
+
+
+if sudo cat $configfile | grep -q $host
+then
+   printf "Host '%s' already present in '%s'\n\n" $host $configfile
+   sudo cat $configfile
+
+else
+
+   printf "\nHost %s\n" $host > $tmpfile
+   printf "\tHostName %s\n" $fullhostname >> $tmpfile
+   printf "\tUser %s\n" $user >> $tmpfile
+   printf "\tIdentityFile %s\n" $idfile >> $tmpfile
+   printf "\tServerAliveInterval %s\n" $keepalive >> $tmpfile
+   printf "\tServerAliveCountMax %s\n" $hbcount >> $tmpfile
+
+   printf "Proposed additions to '%s':\n%s\n" $configfile "$(cat $tmpfile)"
+
+   read -p "Install proposed additions [y/n]?" -n 1 -r
+   if [[ $REPLY =~ ^[Yy]$ ]]
+   then
+      printf "\n"
+      sudo su -c "cp $tmpfile /root"
+      sudo su -c "cat /root/$tmpfile >> $configfile"
+      printf "\nUpdated '%s' file:\n%s\n" $configfile "$(sudo cat $configfile)"
+   else
+      printf "\nChanges ignored.  '%s' not changed.\n" $configfile
+   fi
+
+fi
+

@@ -1,0 +1,42 @@
+#!/bin/bash
+logsrcdir="/var/lib/sierra"
+uploaddir="/opt/sierra/file_uploader/uploads/outgoing/logs"
+senddir="/tmp/server/uploads/incoming/logs"
+user="controls"
+group="sierra"
+
+function copy_to_upload(){
+    if [ -e $1 ]
+    then
+        sudo cp  $1 $uploaddir
+        sudo chown $user $1
+        sudo chgrp $group $1
+    fi
+}
+
+function send_to_external(){
+    if [ -e $1 ]
+    then
+        # Create logs folder on server if it doesn't exist
+        mkdir -p $senddir
+
+        sudo cp  $1 $senddir
+        sudo chown $user $1
+        sudo chgrp $group $1
+    fi
+}
+
+#printf "Uploading log files from %s\n" $logsrcdir
+
+# External network device (File Uploader / Serial Receive)
+copy_to_upload "$logsrcdir/file-uploader-pidcheck.txt"
+copy_to_upload "$logsrcdir/log-fileuploader.txt"
+copy_to_upload "$logsrcdir/serial-recv-pidcheck.txt"
+copy_to_upload "$logsrcdir/log-serial-recv.txt"
+
+# Internal network device (Serial Send)
+send_to_external "$logsrcdir/log-serial-send.txt"
+send_to_external "$logsrcdir/log-sshfs-mount.log"
+send_to_external "$logsrcdir/serial-send-pidcheck.txt"
+
+

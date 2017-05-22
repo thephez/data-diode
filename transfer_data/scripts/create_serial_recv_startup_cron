@@ -1,0 +1,30 @@
+#!/bin/sh
+echo "Adding cron entry to start Serial Receive on startup"
+echo "Starting cron"
+sudo crontab -l
+echo " "
+echo "Adding cron entry"
+
+   # Initialize UART0 CTS/RTS
+   echo "@reboot /opt/sierra/data_diode/transfer_data/scripts/gpio/gpio_set_UART0_flow_control.sh" > cron_serial_startup
+
+   # Set GPIO 26 (Remote Reboot pin for internal unit) as output
+   echo "@reboot raspi-gpio set 26 op dl" >> cron_serial_startup
+
+   # Start Receiving process
+   echo "@reboot python /opt/sierra/data_diode/transfer_data/serial-recv-file.py" >> cron_serial_startup
+
+   # Periodic check to verify process still running
+   echo "* * * * * /opt/sierra/data_diode/transfer_data/scripts/serial_recv_pidcheck.sh" >> cron_serial_startup
+
+   # Daily log upload (at 1:01 AM)
+   echo "01 01 * * * /opt/sierra/data_diode/scripts/daily_log_upload" >> cron_serial_startup
+
+   # Monitor network for outages and auto-reboot
+   echo "* * * * * /opt/sierra/data_diode/scripts/network_check_external.sh" >> cron_serial_startup
+
+   sudo sh -c 'crontab cron_serial_startup'
+   rm cron_serial_startup
+
+echo "Updated cron..."
+sudo crontab -l

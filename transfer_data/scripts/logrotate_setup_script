@@ -1,0 +1,68 @@
+#!/bin/sh
+###########################################################################
+#
+# Updates the logrotate.conf file with an entry for the PID check files
+# This prevents the logfiles from growing too large
+#
+###########################################################################
+
+
+# Shouldn't need to change these values
+user="controls"
+group="sierra"
+configfile="/etc/logrotate.conf"
+tmpfile="logrotate_additions.conf"
+
+
+if sudo cat $configfile | grep -q  "# Sierra log file rotation"
+then
+   printf "Entries already present in '%s'\n\n" $configfile
+   sudo cat $configfile | grep -i "Sierra" # Case insensitive
+
+else
+
+   printf "\n# Sierra log file rotation" > $tmpfile
+   printf "\n/var/lib/sierra/serial-send-pidcheck.txt {\n" >> $tmpfile
+   printf "    su %s %s\n" $user $group >> $tmpfile
+   printf "    missingok\n" >> $tmpfile
+   printf "    rotate 2\n" >> $tmpfile
+   printf "    size 500k\n" >> $tmpfile
+   printf "}\n" >> $tmpfile
+
+   printf "\n/var/lib/sierra/serial-recv-pidcheck.txt {\n" >> $tmpfile
+   printf "    su %s %s\n" $user $group >> $tmpfile
+   printf "    missingok\n" >> $tmpfile
+   printf "    rotate 2\n" >> $tmpfile
+   printf "    size 500k\n" >> $tmpfile
+   printf "}\n" >> $tmpfile
+
+   printf "\n/var/lib/sierra/log-sshfs-mount.log {\n" >> $tmpfile
+   printf "    su %s %s\n" $user $group >> $tmpfile
+   printf "    missingok\n" >> $tmpfile
+   printf "    rotate 2\n" >> $tmpfile
+   printf "    size 500k\n" >> $tmpfile
+   printf "}\n" >> $tmpfile
+
+   printf "\n/var/lib/sierra/file-uploader-pidcheck.txt {\n" >> $tmpfile
+   printf "    su %s %s\n" $user $group >> $tmpfile
+   printf "    missingok\n" >> $tmpfile
+   printf "    rotate 2\n" >> $tmpfile
+   printf "    size 500k\n" >> $tmpfile
+   printf "}" >> $tmpfile
+
+   printf "Proposed additions to '%s':\n%s\n" $configfile "$(cat $tmpfile)"
+
+   read -p "Install proposed additions (Yes, unless you have a good reason not to) [y/n]?" -n 1 -r
+   if [[ $REPLY =~ ^[Yy]$ ]]
+   then
+      printf "\n"
+      sudo su -c "cp $tmpfile /root"
+      sudo su -c "cat /root/$tmpfile >> $configfile"
+      printf "\nUpdated '%s' file:\n%s\n" $configfile "$(sudo cat $configfile)"
+      rm $tmpfile
+   else
+      printf "\nChanges ignored.  '%s' not changed.\n" $configfile
+   fi
+
+fi
+

@@ -1,0 +1,31 @@
+#!/bin/sh
+echo "Adding cron entry to start Serial Send on startup"
+echo "Starting cron"
+sudo crontab -l
+echo " "
+echo "Adding cron entry"
+
+   # Initialize UART0 CTS/RTS
+   echo "@reboot /opt/sierra/data_diode/transfer_data/scripts/gpio/gpio_set_UART0_flow_control.sh" > cron_serial_startup
+
+   # Start Sending process
+   echo "@reboot python /opt/sierra/data_diode/transfer_data/serial-send-file.py" >> cron_serial_startup
+
+   # Periodic check to verify process still running
+   echo "* * * * * /opt/sierra/data_diode/transfer_data/scripts/serial_send_pidcheck.sh" >> cron_serial_startup
+
+   # Mount server shared folder after reboot
+   echo "@reboot sleep 30 && /opt/sierra/data_diode/transfer_data/scripts/mount_sshfs_server.sh" >> cron_serial_startup
+   echo "*/15 * * * * /opt/sierra/data_diode/transfer_data/scripts/mount_sshfs_server.sh" >> cron_serial_startup
+
+   # Daily log upload (at 1:01 AM)
+   echo "01 01 * * * /opt/sierra/data_diode/scripts/daily_log_upload" >> cron_serial_startup
+
+   # Periodic check for remote reboot command from external unit
+   echo "* * * * * /opt/sierra/data_diode/scripts/reboot_check.sh" >> cron_serial_startup
+
+   sudo sh -c 'crontab cron_serial_startup'
+   rm cron_serial_startup
+
+echo "Updated cron..."
+sudo crontab -l
