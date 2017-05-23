@@ -1,0 +1,19 @@
+#!/bin/sh
+echo "Adding cron entry to start File Uploader on startup"
+echo "Starting cron"
+crontab -l
+echo " "
+echo "Adding cron entry"
+
+   # Start Sending process
+   echo "@reboot python /opt/sierra/data_diode/upload_data/fileuploader.py" > cron_fileuploader_startup
+
+   # Periodic check to verify process still running
+   echo "* * * * * /opt/sierra/data_diode/upload_data/scripts/fileuploader_pidcheck.sh" >> cron_fileuploader_startup
+
+
+   crontab cron_fileuploader_startup
+   rm cron_fileuploader_startup
+
+echo "Updated cron..."
+crontab -l
