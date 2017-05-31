@@ -70,4 +70,4 @@ Configure for send or receive / upload via the _Setup scripts in the home folder
 ![](doc/media/03_Pinout.png)
 
 
-![](doc/media/02_Wiring Diagram.png)
+![](doc/media/02_Wiring_Diagram.png)
