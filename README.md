@@ -1,6 +1,9 @@
 # data-diode
 Securely transfer data from a secure network to an untrusted network using Raspberry Pis (effectively a basic unidirectional network device / data diode).
 
+![](doc/media/01_Architecture.png)
+
+
 # Secure -> Untrusted transfer between Raspberry Pi units
 Each Pi acts as an Ethernet to Serial converter with the 2 Pi units connected via serial port.  Only one of the Tx->Rx pairs is connected so the untrusted side cannot transfer data back to the trusted side.
 
@@ -12,7 +15,6 @@ The upload_data/fileuploader.py script enables uploading files from the untruste
 # Remote commands
 There is limited support for sending commands to the untrusted Pi via Dropbox (the Pi checks for the presence of a command file).  This enables remotely rebooting or requesting log files.  Using a GPIO pin, a reboot of the secure Pi can also be done.
 
-![](doc/media/01_Architecture.png)
 
 #Clean install instructions
 --------------------------
@@ -63,3 +65,9 @@ Configure for send or receive / upload via the _Setup scripts in the home folder
     - Point SSHFS mount script to correct server (server must be running SSH and have controls user configured for key based login)
   - Receiving (External Network) Script (~/Receiving_External_Network_Setup_script)
   - Uploader (External Network) Script (only run on receiving side) (~/Uploader_External_Network_Setup_script)
+
+# Wiring Details
+![](doc/media/02_Wiring Diagram.png)
+
+
+![](doc/media/02_Wiring Diagram.png)
