@@ -12,6 +12,7 @@ The upload_data/fileuploader.py script enables uploading files from the untruste
 # Remote commands
 There is limited support for sending commands to the untrusted Pi via Dropbox (the Pi checks for the presence of a command file).  This enables remotely rebooting or requesting log files.  Using a GPIO pin, a reboot of the secure Pi can also be done.
 
+![](doc/media/01_Architecture.png)
 
 #Clean install instructions
 --------------------------
